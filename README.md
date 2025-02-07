@@ -15,3 +15,4 @@ This repository contains **Hack The Box (HTB) machine writeups**, including step
 │   ├── 📸 Screenshots/
 │   ├── 📜 Exploits/
 ```
+**Platform:**[Hack The Box](hackthebox.com)
