@@ -276,10 +276,7 @@ In order to give complete access we use suggestion from blood hound i.e. dacledi
 
 <img src="Imgs/image28.jpg" alt="error loading image"> 
 
-Form here onward I mostly use certipy. I prefer certipy over certify-ad for more on certipy have 
-[excellent writeup](https://medium.com/@init.d/certipy-or-certipy-ad-40a313992692)
-
-To check available template and misconfigured template that allow privilege escalation. We use certipy-ad but the exact can be done using certipy
+ Now available template and misconfigured template that allow privilege escalation.
 
 **Command:** `certipy-ad find -u "ryan" -p "<password here>" -dc-ip 10.10.11.51 -debug `
 
