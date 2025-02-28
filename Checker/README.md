@@ -1,10 +1,4 @@
-```jsx
-Machine: Checker
-OS: Linux
-Status: Season 7 Active Machine
-Solved On: 23 th Feb, 2025
-Difficulty: Hard 
-```
+<img src="Img/image.png" alt="Error Image">
 
 ## Ping Test:
 
